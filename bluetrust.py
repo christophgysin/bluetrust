@@ -138,11 +138,11 @@ class Site(resource.Resource):
         if b'trust' in request.args:
             for arg in request.args[b'trust']:
                 address = arg.decode('utf-8')
-                _trusted.append(address)
+                device_trust(address)
         if b'remove' in request.args:
             for arg in request.args[b'remove']:
                 address = arg.decode('utf-8')
-                _trusted.remove(address)
+                device_remove(address)
         if b'discover' in request.args:
             for arg in request.args[b'discover']:
                 path = arg.decode('utf-8')
@@ -175,6 +175,34 @@ def dbus2py(obj):
     return obj
 
 
+def device_trust(address):
+    _trusted.append(address)
+
+    for adapter in _adapters:
+        path = '{}/dev_{}'.format(adapter,
+                                  address.replace(':', '_'))
+        obj = bus.get_object('org.bluez', path)
+        if not obj:
+            continue
+
+        props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
+        props_iface.Set('org.bluez.Device1', 'Trusted', dbus.Boolean(True))
+
+
+def device_remove(address):
+    _trusted.remove(address)
+
+    for adapter in _adapters:
+        path = '{}/dev_{}'.format(adapter,
+                                  address.replace(':', '_'))
+        obj = bus.get_object('org.bluez', path)
+        if not obj:
+            continue
+
+        props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
+        props_iface.Set('org.bluez.Device1', 'Trusted', dbus.Boolean(False))
+
+
 def split_device_path(path):
     adapter, device = path.rsplit('/', 1)
     address = ':'.join(device.split('_')[1:])
@@ -203,6 +231,7 @@ def device_added(path):
     address = dbus2py(props['Address'])
     name = dbus2py(props.get('Name', ''))
     rssi = dbus2py(props.get('RSSI', ''))
+    trusted = dbus2py(props.get('Trusted'))
 
     print('device: {} {} {} {}'.format(adapter, address, name, rssi))
 
@@ -210,9 +239,8 @@ def device_added(path):
                          'adapter': adapter,
                          'RSSI': rssi}
 
-    if address in _trusted:
-        device = dbus.Interface(obj, 'org.bluez.Device1')
-        props_iface.Set('org.bluez.Device1', 'Trusted', dbus.Boolean(True))
+    if trusted:
+        _trusted.append(address)
 
 
 def iface_added(path, objects):
