@@ -8,9 +8,12 @@ try:
     from gi.repository import GObject
 except ImportError:
     import gobject as GObject
-
-from twisted.internet import gireactor
-gireactor.install()
+try:
+    from twisted.internet import gireactor
+    gireactor.install()
+except ImportError:
+    from twisted.internet import glib2reactor
+    glib2reactor.install()
 from twisted.internet import reactor
 from twisted.web import server, resource
 
