@@ -24,7 +24,7 @@ _trusted = []
 
 _template_css = '''\
       body {
-          font-family: monospace;
+        font-family: monospace;
       }
       table {
         border-collapse: collapse;
