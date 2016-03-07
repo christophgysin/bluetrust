@@ -159,10 +159,12 @@ def init_webserver():
         from twisted.python.systemd import ListenFDs
         if ListenFDs.fromEnvironment().inheritedDescriptors():
             s = service('systemd:domain=INET:index=0', factory)
+            print("Inheriting socket from systemd...")
     except ImportError:
         pass
 
     if s is None:
+        print("Listening on port 8080...")
         s = service('tcp:8080', factory)
 
     s.startService()
