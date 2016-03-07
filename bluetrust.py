@@ -16,6 +16,7 @@ except ImportError:
     glib2reactor.install()
 from twisted.internet import reactor
 from twisted.web import server, resource
+from twisted.application.strports import service
 
 
 _adapters = {}
@@ -151,8 +152,20 @@ class Site(resource.Resource):
 
 
 def init_webserver():
-    site = server.Site(Site())
-    reactor.listenTCP(8080, site)
+    factory = server.Site(Site())
+
+    s = None
+    try:
+        from twisted.python.systemd import ListenFDs
+        if ListenFDs.fromEnvironment().inheritedDescriptors():
+            s = service('systemd:domain=INET:index=0', factory)
+    except ImportError:
+        pass
+
+    if s is None:
+        s = service('tcp:8080', factory)
+
+    s.startService()
 
 
 def dbus2py(obj):
