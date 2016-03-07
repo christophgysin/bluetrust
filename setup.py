@@ -9,7 +9,7 @@ setup(name='bluetrust',
       author_email='christoph.gysin@gmail.com',
       url='https://github.com/christophgysin/bluetrust',
       license='GPLv2',
-      scripts=['bluetrust.py'],
+      scripts=['bluetrust'],
       requires=['dbus (>=1.2.0)',
                 'gobject (>=2.28.3)',
                 'twisted (>=13.2.0)']
