@@ -1,0 +1,7 @@
+[Unit]
+Description=Bluetrust
+
+[Service]
+ExecStart=/usr/bin/bluetrust
+NonBlocking=true
+Restart=always
