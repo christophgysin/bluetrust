@@ -156,11 +156,9 @@ def init_webserver():
 
     s = None
     try:
-        from twisted.python.systemd import ListenFDs
-        if ListenFDs.fromEnvironment().inheritedDescriptors():
-            s = service('systemd:domain=INET:index=0', factory)
-            print("Inheriting socket from systemd...")
-    except ImportError:
+        s = service('systemd:domain=INET:index=0', factory)
+        print("Inheriting socket from systemd...")
+    except:
         pass
 
     if s is None:
