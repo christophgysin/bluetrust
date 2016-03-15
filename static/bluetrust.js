@@ -1,16 +1,17 @@
 function bluetrust_init() {
-    //var menuId = $("ul.nav").first().attr("id");
-        //data: { id : menuId },
-        //dataType: "html"
+    bluetrust_adapters_list();
+    bluetrust_devices_list();
+}
 
-    var request;
-
-    request = $.ajax({url: "/adapter"});
-    request.done(bluetrust_adapters);
+function bluetrust_adapters_list() {
+    var request = $.ajax({url: "/adapter"});
+    request.done(bluetrust_adapters_set);
     request.fail(bluetrust_failed);
+}
 
-    request = $.ajax({url: "/device"});
-    request.done(bluetrust_devices);
+function bluetrust_devices_list() {
+    var request = $.ajax({url: "/device"});
+    request.done(bluetrust_devices_set);
     request.fail(bluetrust_failed);
 }
 
@@ -18,7 +19,7 @@ function bluetrust_failed(jqXHR, textStatus) {
     alert("Request failed: " + textStatus);
 }
 
-function bluetrust_adapters(adapters) {
+function bluetrust_adapters_set(adapters) {
     var rows = '';
 
     for(path in adapters)
@@ -43,10 +44,12 @@ function bluetrust_adapters(adapters) {
             '</tr>';
     }
 
+    $("#adapters").find("tr:gt(0)").remove();
     $('#adapters tr:last').after(rows);
 }
 
-function bluetrust_devices(devices) {
+
+function bluetrust_devices_set(devices) {
     var rows = '';
 
     for(address in devices)
@@ -60,16 +63,28 @@ function bluetrust_devices(devices) {
                 '<td>' + address + '</td>' +
                 '<td>' + device.RSSI + '</td>' +
                 '<td>' +
-                    '<button' +
-                     ' name="' + action + '"' +
-                     ' value="' + address + '"' +
-                     ' type="submit"' +
-                     '>' +
+                    '<button onclick="' +
+                        'bluetrust_device_action(' +
+                            "'" + address + "', '" + action + "');" +
+                    '">' +
                         action +
-                     '</button>' +
+                    '</button>' +
                 '</td>' +
             '</tr>';
     }
 
+    $("#devices").find("tr:gt(0)").remove();
     $('#devices tr:last').after(rows);
+}
+
+function bluetrust_device_action(address, action) {
+    var request;
+    request = $.ajax({
+        url: "/device",
+        method: "POST",
+        data: {address: address,
+               action: action},
+    });
+    request.done(bluetrust_devices_list);
+    request.fail(bluetrust_failed);
 }

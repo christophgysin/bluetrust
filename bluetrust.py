@@ -34,7 +34,8 @@ class BtAdapter(resource.Resource):
         return json.dumps(_adapters).encode('utf-8')
 
     def render_POST(self, request):
-        pass
+        return b""
+
 
 
 class BtDevice(resource.Resource):
@@ -45,11 +46,19 @@ class BtDevice(resource.Resource):
         return json.dumps(_devices).encode('utf-8')
 
     def render_POST(self, request):
-        pass
+        address = request.args[b'address'][0].decode('utf-8')
+        action = request.args[b'action'][0].decode('utf-8')
+
+        if action == "trust":
+            device_trust(address)
+        elif action == "untrust":
+            device_untrust(address)
+
+        return b""
 
 
 def init_logging():
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.WARNING)
 
     observer = log.PythonLoggingObserver(loggerName='logname')
     observer.start()
@@ -193,9 +202,11 @@ def adapter_added(path):
 
     props_iface.Set('org.bluez.Adapter1', 'Discoverable', dbus.Boolean(True))
 
+
 def adapter_removed(path):
     path = dbus2py(path)
     del(_adapters[path])
+
 
 def start_discovery(path):
     adapter = dbus.Interface(bus.get_object('org.bluez', path), 'org.bluez.Adapter1')
