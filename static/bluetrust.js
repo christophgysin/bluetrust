@@ -56,7 +56,7 @@ function bluetrust_adapter_action(adapter, action) {
         data: {adapter: adapter,
                action: action},
     });
-    request.done(bluetrust_list('adapter'));
+    request.done(function(data){ bluetrust_set('adapter', data); });
     request.fail(bluetrust_failed);
 }
 
@@ -66,7 +66,7 @@ function bluetrust_devices_set(devices) {
     for(address in devices)
     {
         var device = devices[address];
-        var action = device.trusted ? 'untrust' : 'trust';
+        var action = device.Trusted ? 'untrust' : 'trust';
 
         rows +=
             '<tr>' +
@@ -96,6 +96,6 @@ function bluetrust_device_action(address, action) {
         data: {address: address,
                action: action},
     });
-    request.done(bluetrust_list('device'));
+    request.done(function(data){ bluetrust_set('device', data); });
     request.fail(bluetrust_failed);
 }

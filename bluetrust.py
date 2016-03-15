@@ -39,8 +39,8 @@ class BtAdapter(resource.Resource):
 
         if action == "discover":
             start_discovery(adapter)
-        return b""
 
+        return self.render_GET(request)
 
 
 class BtDevice(resource.Resource):
@@ -59,7 +59,7 @@ class BtDevice(resource.Resource):
         elif action == "untrust":
             device_untrust(address)
 
-        return b""
+        return self.render_GET(request)
 
 
 def init_logging():
@@ -109,7 +109,7 @@ def dbus2py(obj):
 
 
 def device_trust(address):
-    _devices[address]['trusted'] = True
+    _devices[address]['Trusted'] = True
 
     for adapter in _adapters:
         path = '{}/dev_{}'.format(adapter,
@@ -123,7 +123,7 @@ def device_trust(address):
 
 
 def device_untrust(address):
-    _devices[address]['trusted'] = False
+    _devices[address]['Trusted'] = False
 
     for adapter in _adapters:
         path = '{}/dev_{}'.format(adapter,
@@ -171,7 +171,7 @@ def device_added(path):
     _devices[address] = {'name': name,
                          'adapter': adapter,
                          'RSSI': rssi,
-                         'trusted': trusted}
+                         'Trusted': trusted}
 
 
 
