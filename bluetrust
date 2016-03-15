@@ -18,6 +18,8 @@ from twisted.internet import reactor
 from twisted.web import server, static, resource
 from twisted.application.strports import service
 
+import logging
+from twisted.python import log
 
 _adapters = {}
 _devices = {}
@@ -136,6 +138,13 @@ class BlueResource(resource.Resource):
         return self.render_GET(request)
 
 
+def init_logging():
+    logging.basicConfig(level=logging.DEBUG)
+
+    observer = log.PythonLoggingObserver(loggerName='logname')
+    observer.start()
+
+
 def init_webserver():
     root = resource.Resource()
     blueResource = BlueResource()
@@ -148,12 +157,10 @@ def init_webserver():
     s = None
     try:
         s = service('systemd:domain=INET:index=0', factory)
-        print("Inheriting socket from systemd...")
     except:
         pass
 
     if s is None:
-        print("Listening on port 8080...")
         s = service('tcp:8080', factory)
 
     s.startService()
@@ -293,6 +300,8 @@ def connect_to_bluez():
 
 
 if __name__ == '__main__':
+    init_logging()
+
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = dbus.SystemBus()
 
