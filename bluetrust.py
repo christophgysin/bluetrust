@@ -14,7 +14,6 @@ try:
 except ImportError:
     from twisted.internet import glib2reactor
     glib2reactor.install()
-from twisted.internet import reactor
 from twisted.web import server, static, resource
 from twisted.application.strports import service
 
@@ -87,8 +86,6 @@ _template_device = '''\
             <button name="{action}" value="{address}" type="submit">{action}</button>
           </td>
         </tr>'''
-
-
 
 
 class BlueResource(resource.Resource):
@@ -290,13 +287,11 @@ def connect_to_bluez():
 
     objmanager.connect_to_signal('InterfacesAdded', iface_added)
 
-    adapters = []
     for path, interfaces in objects.items():
         if 'org.bluez.Adapter1' in interfaces:
             adapter_added(path)
         if 'org.bluez.Device1' in interfaces:
             device_added(path)
-
 
 
 if __name__ == '__main__':
