@@ -52,8 +52,7 @@ function bluetrust_devices(devices) {
     for(address in devices)
     {
         var device = devices[address];
-        console.log(device)
-        var action = 'trust';
+        var action = device.trusted ? 'untrust' : 'trust';
 
         rows +=
             '<tr>' +
@@ -71,8 +70,6 @@ function bluetrust_devices(devices) {
                 '</td>' +
             '</tr>';
     }
-    console.log(rows)
 
-    console.log($('#devices tr:last'))
     $('#devices tr:last').after(rows);
 }

@@ -24,7 +24,6 @@ import json
 
 _adapters = {}
 _devices = {}
-_trusted = []
 
 
 class BtAdapter(resource.Resource):
@@ -96,7 +95,7 @@ def dbus2py(obj):
 
 
 def device_trust(address):
-    _trusted.append(address)
+    _devices[address]['trusted'] = True
 
     for adapter in _adapters:
         path = '{}/dev_{}'.format(adapter,
@@ -110,7 +109,7 @@ def device_trust(address):
 
 
 def device_untrust(address):
-    _trusted.remove(address)
+    _devices[address]['trusted'] = False
 
     for adapter in _adapters:
         path = '{}/dev_{}'.format(adapter,
@@ -157,10 +156,9 @@ def device_added(path):
 
     _devices[address] = {'name': name,
                          'adapter': adapter,
-                         'RSSI': rssi}
+                         'RSSI': rssi,
+                         'trusted': trusted}
 
-    if trusted:
-        _trusted.append(address)
 
 
 def device_removed(path):
