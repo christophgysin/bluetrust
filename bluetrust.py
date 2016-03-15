@@ -127,7 +127,7 @@ class BlueResource(resource.Resource):
         if b'remove' in request.args:
             for arg in request.args[b'remove']:
                 address = arg.decode('utf-8')
-                device_remove(address)
+                device_untrust(address)
         if b'discover' in request.args:
             for arg in request.args[b'discover']:
                 path = arg.decode('utf-8')
@@ -189,26 +189,26 @@ def device_trust(address):
     for adapter in _adapters:
         path = '{}/dev_{}'.format(adapter,
                                   address.replace(':', '_'))
-        obj = bus.get_object('org.bluez', path)
-        if not obj:
-            continue
+        try:
+            obj = bus.get_object('org.bluez', path)
+            props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
+            props_iface.Set('org.bluez.Device1', 'Trusted', dbus.Boolean(True))
+        except:
+            pass
 
-        props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
-        props_iface.Set('org.bluez.Device1', 'Trusted', dbus.Boolean(True))
 
-
-def device_remove(address):
+def device_untrust(address):
     _trusted.remove(address)
 
     for adapter in _adapters:
         path = '{}/dev_{}'.format(adapter,
                                   address.replace(':', '_'))
-        obj = bus.get_object('org.bluez', path)
-        if not obj:
-            continue
-
-        props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
-        props_iface.Set('org.bluez.Device1', 'Trusted', dbus.Boolean(False))
+        try:
+            obj = bus.get_object('org.bluez', path)
+            props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
+            props_iface.Set('org.bluez.Device1', 'Trusted', dbus.Boolean(False))
+        except:
+            pass
 
 
 def split_device_path(path):
@@ -251,11 +251,23 @@ def device_added(path):
         _trusted.append(address)
 
 
+def device_removed(path):
+    adapter, device = split_device_path(dbus2py(path))
+    del(_devices[device])
+
+
 def iface_added(path, objects):
     if 'org.bluez.Adapter1' in objects:
         adapter_added(path)
     if 'org.bluez.Device1' in objects:
         device_added(path)
+
+
+def iface_removed(path, objects):
+    if 'org.bluez.Adapter1' in objects:
+        adapter_removed(path)
+    if 'org.bluez.Device1' in objects:
+        device_removed(path)
 
 
 def adapter_added(path):
@@ -271,6 +283,9 @@ def adapter_added(path):
 
     props_iface.Set('org.bluez.Adapter1', 'Discoverable', dbus.Boolean(True))
 
+def adapter_removed(path):
+    path = dbus2py(path)
+    del(_adapters[path])
 
 def start_discovery(path):
     adapter = dbus.Interface(bus.get_object('org.bluez', path), 'org.bluez.Adapter1')
@@ -286,6 +301,7 @@ def connect_to_bluez():
     objects = objmanager.GetManagedObjects()
 
     objmanager.connect_to_signal('InterfacesAdded', iface_added)
+    objmanager.connect_to_signal('InterfacesRemoved', iface_removed)
 
     for path, interfaces in objects.items():
         if 'org.bluez.Adapter1' in interfaces:
