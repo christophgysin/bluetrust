@@ -20,119 +20,33 @@ from twisted.application.strports import service
 import logging
 from twisted.python import log
 
+import json
+
 _adapters = {}
 _devices = {}
 _trusted = []
 
-_template = '''\
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="static/default.css" />
-    <title>audio</title>
-  </head>
-  <body>
-    <form method="POST">
-      <h1>Adapters</h1>
-      <table>
-        <tr>
-          <td>adapter</td>
-          <td>address</td>
-          <td></td>
-        </tr>
-{adapters}
-      </table>
-      <h1>Trusted</h1>
-      <table>
-        <tr>
-          <td>name</td>
-          <td>address</td>
-          <td>RSSI</td>
-          <td></td>
-        </tr>
-{trusted}
-      </table>
-      <h1>Devices</h1>
-      <table>
-        <tr>
-          <td>name</td>
-          <td>address</td>
-          <td>RSSI</td>
-          <td></td>
-        </tr>
-{devices}
-      </table>
-    </form>
-  </body>
-</html>'''
 
-_template_adapter = '''\
-        <tr>
-          <td>{name}</td>
-          <td>{address}</td>
-          <td>
-            <button name="discover" value="{path}" type="submit">discover</button>
-          </td>
-        </tr>'''
-
-_template_device = '''\
-        <tr>
-          <td>{name}</td>
-          <td>{address}</td>
-          <td>{rssi}</td>
-          <td>
-            <button name="{action}" value="{address}" type="submit">{action}</button>
-          </td>
-        </tr>'''
-
-
-class BlueResource(resource.Resource):
+class BtAdapter(resource.Resource):
     isLeaf = True
 
     def render_GET(self, request):
-        adapters = []
-        for path, adapter in _adapters.items():
-            _, name = path.rsplit('/', 1)
-            adapter_item = _template_adapter.format(name=name,
-                                                    path=path,
-                                                    address=adapter['address'])
-            adapters.append(adapter_item)
-
-        trusted = []
-        devices = []
-        for address, device in _devices.items():
-            if address in _trusted:
-                trusted.append(_template_device.format(address=address,
-                                                       name=device['name'],
-                                                       rssi=device['RSSI'],
-                                                       action='remove'))
-            else:
-                devices.append(_template_device.format(address=address,
-                                                       name=device['name'],
-                                                       rssi=device['RSSI'],
-                                                       action='trust'))
-
-        response = _template.format(adapters='\n'.join(adapters),
-                                    trusted='\n'.join(trusted),
-                                    devices='\n'.join(devices))
-        return response.encode('utf-8')
+        request.setHeader(b'Content-Type', b'application/json')
+        return json.dumps(_adapters).encode('utf-8')
 
     def render_POST(self, request):
-        if b'trust' in request.args:
-            for arg in request.args[b'trust']:
-                address = arg.decode('utf-8')
-                device_trust(address)
-        if b'remove' in request.args:
-            for arg in request.args[b'remove']:
-                address = arg.decode('utf-8')
-                device_untrust(address)
-        if b'discover' in request.args:
-            for arg in request.args[b'discover']:
-                path = arg.decode('utf-8')
-                start_discovery(path)
-        return self.render_GET(request)
+        pass
+
+
+class BtDevice(resource.Resource):
+    isLeaf = True
+
+    def render_GET(self, request):
+        request.setHeader(b'Content-Type', b'application/json')
+        return json.dumps(_devices).encode('utf-8')
+
+    def render_POST(self, request):
+        pass
 
 
 def init_logging():
@@ -143,11 +57,9 @@ def init_logging():
 
 
 def init_webserver():
-    root = resource.Resource()
-    blueResource = BlueResource()
-    root.putChild(b"", blueResource)
-    staticResource = static.File("static")
-    root.putChild(b"static", staticResource)
+    root = static.File("static")
+    root.putChild(b"adapter", BtAdapter())
+    root.putChild(b"device", BtDevice())
 
     factory = server.Site(root)
 
