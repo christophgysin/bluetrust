@@ -34,6 +34,11 @@ class BtAdapter(resource.Resource):
         return json.dumps(_adapters).encode('utf-8')
 
     def render_POST(self, request):
+        adapter = request.args[b'adapter'][0].decode('utf-8')
+        action = request.args[b'action'][0].decode('utf-8')
+
+        if action == "discover":
+            start_discovery(adapter)
         return b""
 
 
@@ -209,6 +214,7 @@ def adapter_removed(path):
 
 
 def start_discovery(path):
+    print(path + ": Starting discovery")
     adapter = dbus.Interface(bus.get_object('org.bluez', path), 'org.bluez.Adapter1')
     try:
         adapter.StartDiscovery()

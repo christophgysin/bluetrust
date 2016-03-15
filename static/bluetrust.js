@@ -1,22 +1,23 @@
 function bluetrust_init() {
-    bluetrust_adapters_list();
-    bluetrust_devices_list();
+    bluetrust_list('adapter');
+    bluetrust_list('device');
 }
 
-function bluetrust_adapters_list() {
-    var request = $.ajax({url: "/adapter"});
-    request.done(bluetrust_adapters_set);
-    request.fail(bluetrust_failed);
-}
-
-function bluetrust_devices_list() {
-    var request = $.ajax({url: "/device"});
-    request.done(bluetrust_devices_set);
+function bluetrust_list(type) {
+    var request = $.ajax({url: '/' + type});
+    request.done(function(data){ bluetrust_set(type, data); });
     request.fail(bluetrust_failed);
 }
 
 function bluetrust_failed(jqXHR, textStatus) {
     alert("Request failed: " + textStatus);
+}
+
+function bluetrust_set(type, data) {
+    if (type == "adapter")
+        bluetrust_adapters_set(data);
+    else if (type == "device")
+        bluetrust_devices_set(data);
 }
 
 function bluetrust_adapters_set(adapters) {
@@ -33,13 +34,12 @@ function bluetrust_adapters_set(adapters) {
                 '<td>' + adapter.name + '</td>' +
                 '<td>' + adapter.address + '</td>' +
                 '<td>' +
-                    '<button' +
-                     ' name="' + action + '"' +
-                     ' value="' + adapter.address + '"' +
-                     ' type="submit"' +
-                     '>' +
+                    '<button onclick="' +
+                        'bluetrust_adapter_action(' +
+                            "'" + path + "', '" + action + "');" +
+                    '">' +
                         action +
-                     '</button>' +
+                    '</button>' +
                 '</td>' +
             '</tr>';
     }
@@ -48,6 +48,17 @@ function bluetrust_adapters_set(adapters) {
     $('#adapters tr:last').after(rows);
 }
 
+function bluetrust_adapter_action(adapter, action) {
+    var request;
+    request = $.ajax({
+        url: "/adapter",
+        method: "POST",
+        data: {adapter: adapter,
+               action: action},
+    });
+    request.done(bluetrust_list('adapter'));
+    request.fail(bluetrust_failed);
+}
 
 function bluetrust_devices_set(devices) {
     var rows = '';
@@ -85,6 +96,6 @@ function bluetrust_device_action(address, action) {
         data: {address: address,
                action: action},
     });
-    request.done(bluetrust_devices_list);
+    request.done(bluetrust_list('device'));
     request.fail(bluetrust_failed);
 }
