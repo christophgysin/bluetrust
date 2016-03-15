@@ -15,7 +15,7 @@ except ImportError:
     from twisted.internet import glib2reactor
     glib2reactor.install()
 from twisted.internet import reactor
-from twisted.web import server, resource
+from twisted.web import server, static, resource
 from twisted.application.strports import service
 
 
@@ -23,31 +23,14 @@ _adapters = {}
 _devices = {}
 _trusted = []
 
-_template_css = '''\
-      body {
-        font-family: monospace;
-      }
-      table {
-        border-collapse: collapse;
-      }
-      table, th, td {
-        border: 1px solid #ddd;
-      }
-      td {
-        padding: 5px;
-      }'''
-
 _template = '''\
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="3">
+    <link rel="stylesheet" type="text/css" href="static/default.css" />
     <title>audio</title>
-    <style>
-{css}
-    </style>
   </head>
   <body>
     <form method="POST">
@@ -104,8 +87,11 @@ _template_device = '''\
         </tr>'''
 
 
-class Site(resource.Resource):
+
+
+class BlueResource(resource.Resource):
     isLeaf = True
+
     def render_GET(self, request):
         adapters = []
         for path, adapter in _adapters.items():
@@ -129,8 +115,7 @@ class Site(resource.Resource):
                                                        rssi=device['RSSI'],
                                                        action='trust'))
 
-        response = _template.format(css=_template_css,
-                                    adapters='\n'.join(adapters),
+        response = _template.format(adapters='\n'.join(adapters),
                                     trusted='\n'.join(trusted),
                                     devices='\n'.join(devices))
         return response.encode('utf-8')
@@ -152,7 +137,13 @@ class Site(resource.Resource):
 
 
 def init_webserver():
-    factory = server.Site(Site())
+    root = resource.Resource()
+    blueResource = BlueResource()
+    root.putChild(b"", blueResource)
+    staticResource = static.File("static")
+    root.putChild(b"static", staticResource)
+
+    factory = server.Site(root)
 
     s = None
     try:
