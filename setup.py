@@ -12,5 +12,8 @@ setup(name='bluetrust',
       scripts=['bluetrust.py'],
       requires=['dbus (>=1.2.0)',
                 'gobject (>=2.28.3)',
-                'twisted (>=13.2.0)']
+                'twisted (>=13.2.0)'],
+      data_files=[('share/bluetrust/static', ['static/index.html',
+                                              'static/default.css',
+                                              'static/bluetrust.js'])]
      )

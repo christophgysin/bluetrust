@@ -2,6 +2,10 @@
 
 from __future__ import print_function
 
+import json
+import os
+import sys
+
 import dbus
 import dbus.mainloop.glib
 try:
@@ -19,8 +23,6 @@ from twisted.application.strports import service
 
 import logging
 from twisted.python import log
-
-import json
 
 _adapters = {}
 _devices = {}
@@ -70,7 +72,8 @@ def init_logging():
 
 
 def init_webserver():
-    root = static.File("static")
+    static_path = os.path.join(sys.prefix, 'share/bluetrust/static')
+    root = static.File(static_path)
     root.putChild(b"adapter", BtAdapter())
     root.putChild(b"device", BtDevice())
 
@@ -172,7 +175,6 @@ def device_added(path):
                          'adapter': adapter,
                          'RSSI': rssi,
                          'Trusted': trusted}
-
 
 
 def device_removed(path):
