@@ -47,8 +47,11 @@ function bt_adapters_set(adapters) {
         var func = 'bt_adapter_action(' + "'" + path + "', '" + action + "');";
         var button = '<button onclick="' + func + '">' + action + '</button>';
         rows.push([path,
-                   adapter.name,
-                   adapter.address,
+                   adapter.Name,
+                   adapter.Address,
+                   adapter.Powered,
+                   adapter.Discoverable,
+                   adapter.Discovering,
                    button]);
     }
     bt_table_set('adapters', rows);
@@ -77,15 +80,22 @@ function bt_devices_set(devices) {
         var func = 'bt_device_action(' + "'" + address + "', '" + action + "');";
         var button = '<button onclick="' + func + '">' + action + '</button>';
 
-        var entry = [device.name,
-                     address,
-                     device.RSSI,
-                     button];
+        if (device.RSSI == undefined) {
+            device.RSSI = ''
+        }
 
-        if(device.Trusted) {
-            trusted.push(entry);
+        if (device.Trusted) {
+            trusted.push([device.Name,
+                          address,
+                          device.RSSI,
+                          device.Paired,
+                          device.Connected,
+                          button]);
         } else {
-            untrusted.push(entry);
+            untrusted.push([device.Name,
+                            address,
+                            device.RSSI,
+                            button]);
         }
     }
 
