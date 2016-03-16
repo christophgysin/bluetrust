@@ -201,8 +201,9 @@ def iface_removed(path, objects):
 def adapter_added(path):
     obj = bus.get_object('org.bluez', path)
     props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
-    props = props_iface.GetAll('org.bluez.Adapter1')
+    props_iface.connect_to_signal('PropertiesChanged', adapter_changed, path_keyword='path')
 
+    props = props_iface.GetAll('org.bluez.Adapter1')
     props = dbus2py(props)
 
     print('adapter: {} {} {}'.format(path,
@@ -211,6 +212,21 @@ def adapter_added(path):
     _adapters[path] = props
 
     props_iface.Set('org.bluez.Adapter1', 'Discoverable', dbus.Boolean(True))
+
+
+def adapter_changed(iface, changed, invalidated, path=None):
+    print('adapter: ' + path, end='')
+    changed = dbus2py(changed)
+    for name, value in changed.items():
+        _adapters[path][name] = value
+        print(" {}: {}".format(name, value), end='')
+    print()
+
+    if 'Discoverable' in changed:
+        if changed['Discoverable'] == False:
+            obj = bus.get_object('org.bluez', path)
+            props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
+            props_iface.Set(iface, 'Discoverable', dbus.Boolean(True))
 
 
 def adapter_removed(path):
