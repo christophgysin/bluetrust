@@ -23,12 +23,10 @@ function bt_set(type, data) {
 function bt_table_set(table, rows) {
     var html = '';
 
-    for(var i=0; i<rows.length; ++i)
-    {
+    for (var i=0; i<rows.length; ++i) {
         var row = rows[i];
         html += '<tr>'
-        for(var j=0; j<row.length; ++j)
-        {
+        for (var j=0; j<row.length; ++j) {
             var field = row[j];
             html += '<td>' + field + '</td>';
         }
@@ -42,8 +40,7 @@ function bt_table_set(table, rows) {
 function bt_adapters_set(adapters) {
     var rows = [];
 
-    for(path in adapters)
-    {
+    for (path in adapters) {
         var adapter = adapters[path];
         var action = 'discover';
 
@@ -73,8 +70,7 @@ function bt_devices_set(devices) {
     var trusted = [];
     var untrusted = [];
 
-    for(address in devices)
-    {
+    for (address in devices) {
         var device = devices[address];
         var action = device.Trusted ? 'untrust' : 'trust';
 
@@ -93,7 +89,7 @@ function bt_devices_set(devices) {
         }
     }
 
-    untrusted.sort(function(a, b){
+    untrusted.sort(function(a, b) {
         return (b[2] - a[2])
     });
 
