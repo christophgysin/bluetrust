@@ -224,6 +224,7 @@ def adapter_added(path):
                                      props.get('Name', '')))
     _adapters[path] = props
 
+    props_iface.Set('org.bluez.Adapter1', 'DiscoverableTimeout', dbus.UInt32(0))
     props_iface.Set('org.bluez.Adapter1', 'Discoverable', dbus.Boolean(True))
 
 
@@ -234,12 +235,6 @@ def adapter_changed(iface, changed, invalidated, path=None):
         _adapters[path][name] = value
         print(" {}: {}".format(name, value), end='')
     print()
-
-    if 'Discoverable' in changed:
-        if changed['Discoverable'] == False:
-            obj = bus.get_object('org.bluez', path)
-            props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
-            props_iface.Set(iface, 'Discoverable', dbus.Boolean(True))
 
 
 def adapter_removed(path):
