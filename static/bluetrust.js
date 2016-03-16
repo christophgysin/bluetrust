@@ -70,7 +70,8 @@ function bt_adapter_action(adapter, action) {
 }
 
 function bt_devices_set(devices) {
-    var rows = [];
+    var trusted = [];
+    var untrusted = [];
 
     for(address in devices)
     {
@@ -79,12 +80,21 @@ function bt_devices_set(devices) {
 
         var func = 'bt_device_action(' + "'" + address + "', '" + action + "');";
         var button = '<button onclick="' + func + '">' + action + '</button>';
-        rows.push([device.name,
-                   address,
-                   device.RSSI,
-                   button]);
+
+        var entry = [device.name,
+                     address,
+                     device.RSSI,
+                     button];
+
+        if(device.Trusted) {
+            trusted.push(entry);
+        } else {
+            untrusted.push(entry);
+        }
     }
-    bt_table_set('devices', rows);
+
+    bt_table_set('trusted', trusted);
+    bt_table_set('devices', untrusted);
 }
 
 function bt_device_action(address, action) {
