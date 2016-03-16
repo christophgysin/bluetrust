@@ -1,26 +1,26 @@
-function bluetrust_init() {
-    bluetrust_list('adapter');
-    bluetrust_list('device');
+function bt_init() {
+    bt_list('adapter');
+    bt_list('device');
 }
 
-function bluetrust_list(type) {
+function bt_list(type) {
     var request = $.ajax({url: '/' + type});
-    request.done(function(data){ bluetrust_set(type, data); });
-    request.fail(bluetrust_failed);
+    request.done(function(data){ bt_set(type, data); });
+    request.fail(bt_failed);
 }
 
-function bluetrust_failed(jqXHR, textStatus) {
+function bt_failed(jqXHR, textStatus) {
     alert("Request failed: " + textStatus);
 }
 
-function bluetrust_set(type, data) {
+function bt_set(type, data) {
     if (type == "adapter")
-        bluetrust_adapters_set(data);
+        bt_adapters_set(data);
     else if (type == "device")
-        bluetrust_devices_set(data);
+        bt_devices_set(data);
 }
 
-function bluetrust_adapters_set(adapters) {
+function bt_adapters_set(adapters) {
     var rows = '';
 
     for(path in adapters)
@@ -35,7 +35,7 @@ function bluetrust_adapters_set(adapters) {
                 '<td>' + adapter.address + '</td>' +
                 '<td>' +
                     '<button onclick="' +
-                        'bluetrust_adapter_action(' +
+                        'bt_adapter_action(' +
                             "'" + path + "', '" + action + "');" +
                     '">' +
                         action +
@@ -48,7 +48,7 @@ function bluetrust_adapters_set(adapters) {
     $('#adapters tr:last').after(rows);
 }
 
-function bluetrust_adapter_action(adapter, action) {
+function bt_adapter_action(adapter, action) {
     var request;
     request = $.ajax({
         url: "/adapter",
@@ -56,11 +56,11 @@ function bluetrust_adapter_action(adapter, action) {
         data: {adapter: adapter,
                action: action},
     });
-    request.done(function(data){ bluetrust_set('adapter', data); });
-    request.fail(bluetrust_failed);
+    request.done(function(data){ bt_set('adapter', data); });
+    request.fail(bt_failed);
 }
 
-function bluetrust_devices_set(devices) {
+function bt_devices_set(devices) {
     var rows = '';
 
     for(address in devices)
@@ -75,7 +75,7 @@ function bluetrust_devices_set(devices) {
                 '<td>' + device.RSSI + '</td>' +
                 '<td>' +
                     '<button onclick="' +
-                        'bluetrust_device_action(' +
+                        'bt_device_action(' +
                             "'" + address + "', '" + action + "');" +
                     '">' +
                         action +
@@ -88,7 +88,7 @@ function bluetrust_devices_set(devices) {
     $('#devices tr:last').after(rows);
 }
 
-function bluetrust_device_action(address, action) {
+function bt_device_action(address, action) {
     var request;
     request = $.ajax({
         url: "/device",
@@ -96,6 +96,6 @@ function bluetrust_device_action(address, action) {
         data: {address: address,
                action: action},
     });
-    request.done(function(data){ bluetrust_set('device', data); });
-    request.fail(bluetrust_failed);
+    request.done(function(data){ bt_set('device', data); });
+    request.fail(bt_failed);
 }
