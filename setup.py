@@ -15,5 +15,4 @@ setup(name='bluetrust',
                 'twisted (>=13.2.0)'],
       data_files=[('share/bluetrust/static', ['static/index.html',
                                               'static/default.css',
-                                              'static/bluetrust.js'])]
-     )
+                                              'static/bluetrust.js'])])
