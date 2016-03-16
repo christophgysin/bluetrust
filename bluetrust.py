@@ -224,8 +224,12 @@ def adapter_added(path):
                                      props.get('Name', '')))
     _adapters[path] = props
 
-    props_iface.Set('org.bluez.Adapter1', 'DiscoverableTimeout', dbus.UInt32(0))
-    props_iface.Set('org.bluez.Adapter1', 'Discoverable', dbus.Boolean(True))
+    if props['DiscoverableTimeout'] != 0:
+        props_iface.Set('org.bluez.Adapter1', 'DiscoverableTimeout', dbus.UInt32(0))
+    if not props['Discoverable']:
+        props_iface.Set('org.bluez.Adapter1', 'Discoverable', dbus.Boolean(True))
+    if not props['Pairable']:
+        props_iface.Set('org.bluez.Adapter1', 'Pairable', dbus.Boolean(True))
 
 
 def adapter_changed(iface, changed, invalidated, path=None):

@@ -49,8 +49,6 @@ function bt_adapters_set(adapters) {
         rows.push([path,
                    adapter.Name,
                    adapter.Address,
-                   adapter.Powered,
-                   adapter.Discoverable,
                    adapter.Discovering,
                    button]);
     }
