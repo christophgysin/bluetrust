@@ -73,6 +73,10 @@ def init_logging():
 
 def init_webserver():
     static_path = os.path.join(sys.prefix, 'share/bluetrust/static')
+    if not os.path.exists(static_path):
+        static_path = os.path.join(os.path.dirname(__file__),
+                                   'static')
+
     root = static.File(static_path)
     root.putChild(b"adapter", BtAdapter())
     root.putChild(b"device", BtDevice())
