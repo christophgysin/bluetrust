@@ -20,32 +20,41 @@ function bt_set(type, data) {
         bt_devices_set(data);
 }
 
+function bt_table_set(table, rows) {
+    var html = '';
+
+    for(var i=0; i<rows.length; ++i)
+    {
+        var row = rows[i];
+        html += '<tr>'
+        for(var j=0; j<row.length; ++j)
+        {
+            var field = row[j];
+            html += '<td>' + field + '</td>';
+        }
+        html += '</tr>';
+    }
+
+    $('#' + table).find("tr:gt(0)").remove();
+    $('#' + table + ' tr:last').after(html);
+}
+
 function bt_adapters_set(adapters) {
-    var rows = '';
+    var rows = [];
 
     for(path in adapters)
     {
         var adapter = adapters[path];
         var action = 'discover';
 
-        rows +=
-            '<tr>' +
-                '<td>' + path + '</td>' +
-                '<td>' + adapter.name + '</td>' +
-                '<td>' + adapter.address + '</td>' +
-                '<td>' +
-                    '<button onclick="' +
-                        'bt_adapter_action(' +
-                            "'" + path + "', '" + action + "');" +
-                    '">' +
-                        action +
-                    '</button>' +
-                '</td>' +
-            '</tr>';
+        var func = 'bt_adapter_action(' + "'" + path + "', '" + action + "');";
+        var button = '<button onclick="' + func + '">' + action + '</button>';
+        rows.push([path,
+                   adapter.name,
+                   adapter.address,
+                   button]);
     }
-
-    $("#adapters").find("tr:gt(0)").remove();
-    $('#adapters tr:last').after(rows);
+    bt_table_set('adapters', rows);
 }
 
 function bt_adapter_action(adapter, action) {
@@ -61,31 +70,21 @@ function bt_adapter_action(adapter, action) {
 }
 
 function bt_devices_set(devices) {
-    var rows = '';
+    var rows = [];
 
     for(address in devices)
     {
         var device = devices[address];
         var action = device.Trusted ? 'untrust' : 'trust';
 
-        rows +=
-            '<tr>' +
-                '<td>' + device.name + '</td>' +
-                '<td>' + address + '</td>' +
-                '<td>' + device.RSSI + '</td>' +
-                '<td>' +
-                    '<button onclick="' +
-                        'bt_device_action(' +
-                            "'" + address + "', '" + action + "');" +
-                    '">' +
-                        action +
-                    '</button>' +
-                '</td>' +
-            '</tr>';
+        var func = 'bt_device_action(' + "'" + address + "', '" + action + "');";
+        var button = '<button onclick="' + func + '">' + action + '</button>';
+        rows.push([device.name,
+                   address,
+                   device.RSSI,
+                   button]);
     }
-
-    $("#devices").find("tr:gt(0)").remove();
-    $('#devices tr:last').after(rows);
+    bt_table_set('devices', rows);
 }
 
 function bt_device_action(address, action) {
