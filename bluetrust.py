@@ -107,15 +107,28 @@ def dbus2py(obj):
         return str(obj)
     if isinstance(obj, dbus.ObjectPath):
         return str(obj)
+    if isinstance(obj, dbus.ByteArray):
+        return bytes(obj)
+    if isinstance(obj, dbus.Struct):
+        return tuple(obj)
     if isinstance(obj, dbus.Boolean):
         return bool(obj)
+    if isinstance(obj, dbus.Double):
+        return float(obj)
     if isinstance(obj, dbus.Int16):
         return int(obj)
     if isinstance(obj, dbus.Int32):
         return int(obj)
     if isinstance(obj, dbus.Int64):
         return int(obj)
-    return obj
+    if isinstance(obj, dbus.UInt16):
+        return int(obj)
+    if isinstance(obj, dbus.UInt32):
+        return int(obj)
+    if isinstance(obj, dbus.UInt64):
+        return int(obj)
+
+    raise RuntimeError("Unkown dbus type: " + repr(obj))
 
 
 def device_trust(address):
