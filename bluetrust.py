@@ -99,7 +99,10 @@ def dbus2py(obj):
     if isinstance(obj, dbus.Array):
         return [dbus2py(e) for e in obj]
     if isinstance(obj, dbus.Dictionary):
-        return {(k, dbus2py(v)) for k, v in obj.items()}
+        d = {}
+        for k, v in obj.items():
+            d[dbus2py(k)] = dbus2py(v)
+        return d
     if isinstance(obj, dbus.String):
         return str(obj)
     if isinstance(obj, dbus.ObjectPath):
