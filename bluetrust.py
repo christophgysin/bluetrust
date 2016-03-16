@@ -169,19 +169,14 @@ def device_added(path):
     props_iface.connect_to_signal('PropertiesChanged', device_changed, path_keyword='path')
 
     props = props_iface.GetAll('org.bluez.Device1')
+    props = dbus2py(props)
 
-    adapter = dbus2py(props['Adapter'])
-    address = dbus2py(props['Address'])
-    name = dbus2py(props.get('Name', ''))
-    rssi = dbus2py(props.get('RSSI', ''))
-    trusted = dbus2py(props.get('Trusted'))
+    print('device: {} {} {} {}'.format(props['Adapter'],
+                                       props['Address'],
+                                       props.get('Name', ''),
+                                       props.get('RSSI', '')))
 
-    print('device: {} {} {} {}'.format(adapter, address, name, rssi))
-
-    _devices[address] = {'name': name,
-                         'adapter': adapter,
-                         'RSSI': rssi,
-                         'Trusted': trusted}
+    _devices[props['Address']] = props
 
 
 def device_removed(path):
@@ -208,11 +203,12 @@ def adapter_added(path):
     props_iface = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
     props = props_iface.GetAll('org.bluez.Adapter1')
 
-    address = dbus2py(props['Address'])
-    name = dbus2py(props.get('Name', ''))
+    props = dbus2py(props)
 
-    print('adapter: {} {} {}'.format(path, address, name))
-    _adapters[path] = {'name': name, 'address': address}
+    print('adapter: {} {} {}'.format(path,
+                                     props['Address'],
+                                     props.get('Name', '')))
+    _adapters[path] = props
 
     props_iface.Set('org.bluez.Adapter1', 'Discoverable', dbus.Boolean(True))
 
