@@ -5,3 +5,6 @@ Description=Bluetrust
 ExecStart=/usr/bin/bluetrust.py
 NonBlocking=true
 Restart=always
+
+[Install]
+WantedBy=default.target
