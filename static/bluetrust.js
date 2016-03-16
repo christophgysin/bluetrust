@@ -93,6 +93,10 @@ function bt_devices_set(devices) {
         }
     }
 
+    untrusted.sort(function(a, b){
+        return (b[2] - a[2])
+    });
+
     bt_table_set('trusted', trusted);
     bt_table_set('devices', untrusted);
 }
